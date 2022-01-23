@@ -1,9 +1,9 @@
 export interface RequestBody {
-    ping_urls: Array<string>,
-    reponse_url: string
+    ping_urls: Array<string>
 }
 
 export interface ResponseBody {
-    ping_urls: Array<string>,
-    reponse_url: string
+    host: string,
+    alive: boolean,
+    time: number | "unknown";
 }
