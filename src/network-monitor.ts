@@ -1,44 +1,34 @@
-import * as express from 'express';
-import {Express} from 'express-serve-static-core';
+require('dotenv').config();
+
 import * as ping from 'ping';
-import * as http from 'http';
-import * as bodyParser from 'body-parser';
-import { RequestBody, ResponseBody } from './interfaces';
+import devices from './devices';
+import lineBotClient from './line-bot-client';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
-const app: Express = express();
-
-app.use(bodyParser.json());
-
-app.post('/', (req, res) => {
-
-	try{
-		const body: RequestBody = <RequestBody> req.body;
-		console.log(body);
-
-		const promises: Array<Promise<ping.PingResponse>> = [];
-		body.ping_urls.forEach(function (url) {
-			promises.push(ping.promise.probe(url));
-		});
-
-		Promise.all(promises).then(pingResponse => {
-			console.log(pingResponse);
-			const response: Array<ResponseBody> = pingResponse.map(element => {
-				return {
-					host: element.host,
-					alive: element.alive,
-					time: element.time,
-				};
-			});
-
-			res.json(response);
-		});
-	}catch(error){
-		console.log(error);
-		res.json(error);
+const axiosInstance: AxiosInstance = axios.create({
+	headers: {
+		'Connection': 'keep-alive',
+		'Accept-Encoding': 'gzip, deflate, br'
 	}
 });
 
-const httpServer: http.Server = http.createServer(app);
-httpServer.listen(3000, () => {
-	console.log('HTTP Server running on port 3000');
-});
+function main() {
+	Object.keys(devices).forEach(function (name) {
+		ping.promise.probe(devices[name]).then((result: ping.PingResponse) => {
+			if(!result.alive) {
+				lineBotClient.pushMessage(process.env.LINE_USER_ID, `${name} is down`)
+				.catch((error) => {
+					console.log(`Line error: ${error}`);
+				});
+			}
+		}).catch((error) => {
+			console.log(`Ping error: ${error}`);
+		});
+	});
+
+	axiosInstance.get(process.env.ALIVE_URL).catch(() => {});
+
+	setTimeout(main, parseInt(process.env.WAIT_TIMEOUT_MIN) * 60000);
+}
+
+main()
