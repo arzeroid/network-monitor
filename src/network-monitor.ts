@@ -2,7 +2,6 @@ require('dotenv').config();
 
 import * as ping from 'ping';
 import devices from './devices';
-import lineBotClient from './line-bot-client';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 const axiosInstance: AxiosInstance = axios.create({
@@ -13,20 +12,36 @@ const axiosInstance: AxiosInstance = axios.create({
 });
 
 function main() {
+	const promises: Array<Promise<string>> = [];
 	Object.keys(devices).forEach(function (name) {
-		ping.promise.probe(devices[name]).then((result: ping.PingResponse) => {
-			if(!result.alive) {
-				lineBotClient.pushMessage(process.env.LINE_USER_ID, `${name} is down`)
-				.catch((error) => {
-					console.log(`Line error: ${error}`);
-				});
+		const promise: Promise<string> = ping.promise.probe(devices[name]).then((response: ping.PingResponse) => {
+			if(!response.alive){
+				return `${name} is down`;
 			}
-		}).catch((error) => {
-			console.log(`Ping error: ${error}`);
+		}).catch((reason) => {
+			return JSON.stringify(reason);
 		});
+
+		promises.push(promise);
 	});
 
-	axiosInstance.get(process.env.ALIVE_URL).catch(() => {});
+	Promise.all(promises).then((data: Array<string>) => {
+		data = data.filter(item => item !== undefined);
+		console.log(data);
+		axiosInstance.post(process.env.ALIVE_URL, {
+			userId: process.env.LINE_USER_ID,
+			data: data
+		})
+		.then(response => console.log(response.data))
+		.catch(error => {
+			if(error.isAxiosError) {
+				console.log(error.response.data);
+			}
+			else {
+				console.log(error);
+			}
+		});
+	})
 
 	setTimeout(main, parseInt(process.env.WAIT_TIMEOUT_MIN) * 60000);
 }
