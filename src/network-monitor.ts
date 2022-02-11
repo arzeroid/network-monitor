@@ -1,8 +1,7 @@
-require('dotenv').config();
-
 import * as ping from 'ping';
 import devices from './devices';
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import env from './env';
+import axios, { AxiosInstance } from 'axios';
 
 const axiosInstance: AxiosInstance = axios.create({
 	headers: {
@@ -28,8 +27,8 @@ function main() {
 	Promise.all(promises).then((data: Array<string>) => {
 		data = data.filter(item => item !== undefined);
 		console.log(data);
-		axiosInstance.post(process.env.ALIVE_URL, {
-			userId: process.env.LINE_USER_ID,
+		axiosInstance.post(env.ALIVE_URL, {
+			userId: env.LINE_USER_ID,
 			data: data
 		})
 		.then(response => console.log(response.data))
@@ -43,7 +42,7 @@ function main() {
 		});
 	})
 
-	setTimeout(main, parseInt(process.env.WAIT_TIMEOUT_MIN) * 60000);
+	setTimeout(main, parseInt(env.WAIT_TIMEOUT_MIN) * 60000);
 }
 
 main()
