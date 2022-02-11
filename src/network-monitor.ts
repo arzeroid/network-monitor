@@ -33,12 +33,7 @@ function main() {
 		})
 		.then(response => console.log(response.data))
 		.catch(error => {
-			if(error.isAxiosError) {
-				console.log(error.response.data);
-			}
-			else {
-				console.log(error);
-			}
+			console.log(error);
 		});
 	})
 
