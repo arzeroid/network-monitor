@@ -42,7 +42,7 @@ function main() {
 		});
 	})
 
-	setTimeout(main, parseInt(env.WAIT_TIMEOUT_MIN) * 60000);
+	setTimeout(main, env.WAIT_TIMEOUT_MIN * 60000);
 }
 
 main()
