@@ -1,6 +1,7 @@
+require('dotenv').config();
+
 import * as ping from 'ping';
 import devices from './devices';
-import env from './env';
 import axios, { AxiosInstance } from 'axios';
 
 const axiosInstance: AxiosInstance = axios.create({
@@ -27,8 +28,8 @@ function main() {
 	Promise.all(promises).then((data: Array<string>) => {
 		data = data.filter(item => item !== undefined);
 		console.log(data);
-		axiosInstance.post(env.ALIVE_URL, {
-			userId: env.LINE_USER_ID,
+		axiosInstance.post(process.env.ALIVE_URL, {
+			userId: process.env.LINE_USER_ID,
 			data: data
 		})
 		.then(response => console.log(response.data))
