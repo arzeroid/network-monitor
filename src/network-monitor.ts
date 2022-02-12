@@ -38,7 +38,7 @@ function main() {
 		});
 	})
 
-	setTimeout(main, env.WAIT_TIMEOUT_MIN * 60000);
+	setTimeout(main, parseInt(process.env.WAIT_TIMEOUT_MIN) * 60000);
 }
 
 main()
