@@ -26,6 +26,7 @@ function main() {
 	});
 
 	Promise.all(promises).then((data: Array<string>) => {
+		console.log(new Date().toLocaleString());
 		data = data.filter(item => item !== undefined);
 		console.log(data);
 		axiosInstance.post(process.env.ALIVE_URL, {
