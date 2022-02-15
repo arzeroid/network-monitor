@@ -12,6 +12,7 @@ const axiosInstance: AxiosInstance = axios.create({
 });
 const PING_TIMES: number = parseInt(process.env.PING_TIMES);
 console.log(PING_TIMES);
+
 async function main() {
 	const promises: Array<Promise<string>> = Object.keys(devices).map(async (name) => {
 		let count = 0;
@@ -49,8 +50,6 @@ async function main() {
 	}catch(error) {
 			console.log(error);
 	}
-
-	setTimeout(main, parseInt(process.env.WAIT_TIMEOUT_MIN) * 60000);
 }
 
 main()
