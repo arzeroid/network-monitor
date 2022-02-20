@@ -14,6 +14,17 @@ const PING_TIMES: number = parseInt(process.env.PING_TIMES);
 console.log(PING_TIMES);
 
 async function main() {
+
+	// Ping gateway for wake network up before ping devices
+	let pingGatewayResponse: ping.PingResponse;
+	let count: number = 0;
+	do {
+		pingGatewayResponse = await ping.promise.probe(process.env.GATEWAY_IP);
+		count++;
+
+		console.log(`Ping Gateway #${count}`);
+	} while (!pingGatewayResponse.alive && count < 10);
+
 	const promises: Array<Promise<string>> = Object.keys(devices).map(async (name) => {
 		let count = 0;
 
